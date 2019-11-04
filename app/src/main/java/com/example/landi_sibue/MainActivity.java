@@ -11,8 +11,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         GalleryView view = new GalleryView(this);
-        view.setNumColumns(7);
-        view.setNumRows(2);
+        view.setPicturesNumber(70);
         setContentView(view);
 
     }
