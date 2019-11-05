@@ -47,7 +47,7 @@ public class GalleryView extends View {
         m_context = context;
         m_paths = paths;
 
-        numColumns = 2;
+        numColumns = 3;
         nbImagesAlreadyLoaded = 0;
 
         mScrollDetector = new GestureDetector(context, new ScrollGesture());
@@ -68,19 +68,19 @@ public class GalleryView extends View {
 
         Drawable d;
 
-        for (int i = 0; i < numColumns; i++) {
+        /*for (int i = 0; i < numColumns; i++) {
             for (int j = 0; j < nbRowPerDisplay; j++) {
                     resized = Bitmap.createScaledBitmap(m_imagesList.get(bitmapIndex), cellSize, cellSize, true);
                     canvas.drawBitmap(resized, i* cellSize, j * cellSize - mScroll, null);
                     bitmapIndex++;
             }
-        }
-
-        /*for (int i = bitmapIndex; i - bitmapIndex < nbImageToDisplay && i < m_imagesList.size(); i++) {
-            Bitmap image = BitmapFactory.decodeFile(m_paths.get(i));
-            image = Bitmap.createScaledBitmap(image,cellSize,cellSize,false);
-            canvas.drawBitmap(image, (i%numColumns)*cellSize, (i/numColumns)*cellSize-mScroll, null);
         }*/
+
+        for (int i = bitmapIndex; i - bitmapIndex < nbImageToDisplay && i < m_imagesList.size(); i++) {
+            resized = Bitmap.createScaledBitmap(m_imagesList.get(bitmapIndex), cellSize, cellSize, true);
+            canvas.drawBitmap(resized, (i%numColumns)*cellSize, (i/numColumns)*cellSize-mScroll, null);
+            bitmapIndex++;
+        }
 
     }
 
@@ -103,7 +103,7 @@ public class GalleryView extends View {
 
     public void loadImages(){
 
-        if(nbImageToDisplay > nbImagesAlreadyLoaded || bitmapIndex != 0){
+        if(nbImageToDisplay > nbImagesAlreadyLoaded){
             int nbImagesToLoad = nbImagesAlreadyLoaded + nbImageToDisplay ;
             for(int i = nbImagesAlreadyLoaded ; i< nbImagesToLoad; i++){
                 m_imagesList.add(BitmapFactory.decodeFile(m_paths.get(i)));
@@ -132,13 +132,8 @@ public class GalleryView extends View {
                 else {
                     mScroll += distanceY;
                 }
-                if(mScroll == cellSize){
-                    nbImageToDisplay += numColumns;
-                    loadImages();
-                }
-                else{
-                    calculationCoordinate();
-                }
+                calculationCoordinate();
+
                 
             }
 
@@ -154,7 +149,7 @@ public class GalleryView extends View {
             if(numColumns > 1 && factor > 1){
                 numColumns--;
             }
-            else if (numColumns < 2 && factor < 1){
+            else if (numColumns < 3 && factor < 1){
                 numColumns ++;
             }
             calculationCoordinate();
