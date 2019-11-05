@@ -47,7 +47,7 @@ public class ScanPictures {
 
         }
 
-        System.out.println(paths.get(paths.size()-1));
+        System.out.println(paths);
 
         return  paths;
     }
