@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -64,6 +66,8 @@ public class GalleryView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        Drawable d;
+
         for (int i = 0; i < numColumns; i++) {
             for (int j = 0; j < nbRowPerDisplay; j++) {
                     resized = Bitmap.createScaledBitmap(m_imagesList.get(bitmapIndex), cellSize, cellSize, true);
@@ -99,7 +103,6 @@ public class GalleryView extends View {
 
     public void loadImages(){
 
-
         if(nbImageToDisplay > nbImagesAlreadyLoaded || bitmapIndex != 0){
             int nbImagesToLoad = nbImagesAlreadyLoaded + nbImageToDisplay ;
             for(int i = nbImagesAlreadyLoaded ; i< nbImagesToLoad; i++){
@@ -129,8 +132,14 @@ public class GalleryView extends View {
                 else {
                     mScroll += distanceY;
                 }
-                calculationCoordinate();
-                //invalidate();
+                if(mScroll == cellSize){
+                    nbImageToDisplay += numColumns;
+                    loadImages();
+                }
+                else{
+                    calculationCoordinate();
+                }
+                
             }
 
             return true;
