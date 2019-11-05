@@ -18,24 +18,34 @@ public class GalleryView extends View {
 
     private GestureDetector mGestureDetector;
     private ScaleGestureDetector mScaleGestureDetector;
-    private float mScale = 1;
+
+    private float mScale = 1.f;
     private Bitmap resized =null;
+
     private int numColumns, numRows, nbPict;
     private int cellSize;
+
     private ArrayList<String> m_paths;
     private Context m_context;
 
+    private ArrayList<Bitmap> m_imagesList = new ArrayList<>();
+
     private int nbRowPerDisplay;
     private int nbImageToDisplay;
+    private int nbImagesAlreadyLoaded;
 
     public GalleryView(Context context, ArrayList<String> paths) {
         super(context);
 
         m_context = context;
         m_paths = paths;
+
         numColumns = 2;
+        nbImagesAlreadyLoaded = 0;
+
         mGestureDetector = new GestureDetector(context, new ZoomGesture());
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
+
         this.nbPict = m_paths.size();
     }
 
@@ -49,31 +59,45 @@ public class GalleryView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        numRows = (nbPict/numColumns)+1;
-        cellSize = getWidth() / numColumns;
-
-        System.out.println("CELL SIZE CALCULATE " + getWidth());
-
-        nbRowPerDisplay = getHeight() / cellSize ;
-        nbImageToDisplay = nbRowPerDisplay * numColumns;
-
-        //Bitmap bitmap = BitmapFactory.decodeResource(getContext().getResources(),R.drawable.alterralogo);
         int bitmapIndex = 0;
-        ArrayList<Bitmap> list = new ArrayList<>();
-
-        for(int i = 0 ; i< nbImageToDisplay;i++){
-            list.add(BitmapFactory.decodeFile(m_paths.get(i)));
-        }
 
         for (int i = 0; i < numColumns; i++) {
             for (int j = 0; j < nbRowPerDisplay; j++) {
-                    System.out.println("CELL SIZE IN FOR " + cellSize);
-                    resized = Bitmap.createScaledBitmap(list.get(bitmapIndex), cellSize, cellSize, true);
+                    resized = Bitmap.createScaledBitmap(m_imagesList.get(bitmapIndex), cellSize, cellSize, true);
                     canvas.drawBitmap(resized, i* cellSize, j * cellSize, null);
                     bitmapIndex++;
             }
         }
 
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        calculationCoordinate();
+    }
+
+    public void calculationCoordinate(){
+        numRows = nbPict/numColumns;
+        cellSize = getWidth() / numColumns;
+
+        nbRowPerDisplay = getHeight() / cellSize ;
+        nbImageToDisplay = nbRowPerDisplay * numColumns;
+
+        loadImages();
+    }
+
+    public void loadImages(){
+
+        if(nbImageToDisplay > nbImagesAlreadyLoaded){
+            int nbImagesToLoad = nbImagesAlreadyLoaded + nbImageToDisplay;
+            for(int i = nbImagesAlreadyLoaded ; i< nbImagesToLoad; i++){
+                m_imagesList.add(BitmapFactory.decodeFile(m_paths.get(i)));
+                nbImagesAlreadyLoaded++;
+            }
+        }
+
+        invalidate();
     }
 
     @Override
@@ -100,10 +124,10 @@ public class GalleryView extends View {
             if(numColumns > 1 && factor > 1){
                 numColumns--;
             }
-            else if (numColumns < 7 && factor < 1){
+            else if (numColumns < 3 && factor < 1){
                 numColumns ++;
             }
-            invalidate();
+            calculationCoordinate();
             return true;
         }
     }
