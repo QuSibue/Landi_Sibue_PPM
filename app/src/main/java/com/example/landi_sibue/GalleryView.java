@@ -63,10 +63,13 @@ public class GalleryView extends View {
     }
 
     @Override
+    public void setOnScrollChangeListener(OnScrollChangeListener l) {
+        super.setOnScrollChangeListener(l);
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        Drawable d;
 
         /*for (int i = 0; i < numColumns; i++) {
             for (int j = 0; j < nbRowPerDisplay; j++) {
@@ -76,10 +79,13 @@ public class GalleryView extends View {
             }
         }*/
 
-        for (int i = bitmapIndex; i - bitmapIndex < nbImageToDisplay && i < m_imagesList.size(); i++) {
-            resized = Bitmap.createScaledBitmap(m_imagesList.get(bitmapIndex), cellSize, cellSize, true);
+        BitmapFactory.Options opt = new BitmapFactory.Options();
+        opt.inSampleSize = 1024;
+
+        for (int i = bitmapIndex; i - bitmapIndex < nbImageToDisplay && i < m_paths.size(); i++) {
+            Bitmap map = BitmapFactory.decodeFile(m_paths.get(i),opt);
+            resized = Bitmap.createScaledBitmap(map, cellSize, cellSize, true);
             canvas.drawBitmap(resized, (i%numColumns)*cellSize, (i/numColumns)*cellSize-mScroll, null);
-            bitmapIndex++;
         }
 
     }
@@ -98,10 +104,11 @@ public class GalleryView extends View {
         bitmapIndex = (int) mScroll / cellSize * numColumns;
         nbImageToDisplay = nbRowPerDisplay * numColumns;
 
-        loadImages();
+        invalidate();
+        //loadImages();
     }
 
-    public void loadImages(){
+    /*public void loadImages(){
 
         if(nbImageToDisplay > nbImagesAlreadyLoaded){
             int nbImagesToLoad = nbImagesAlreadyLoaded + nbImageToDisplay ;
@@ -112,7 +119,7 @@ public class GalleryView extends View {
         }
 
         invalidate();
-    }
+    }*/
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
