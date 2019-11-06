@@ -43,7 +43,7 @@ public class GalleryView extends View {
         super(context);
         m_paths = paths; //On récupere la liste de paths passé au constructeur
 
-        numColumns = 7; //on initialise notre nombre de colonnes au maximum
+        numColumns = 3; //on initialise au nombre de colones moyen
 
         mScrollDetector = new GestureDetector(context, new ScrollGesture());
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
@@ -63,7 +63,7 @@ public class GalleryView extends View {
         super.onDraw(canvas);
 
         BitmapFactory.Options opt = new BitmapFactory.Options(); // On définit l'option qui va "raccourcir" les images rendues pour économiser de la mémoire
-        opt.inSampleSize = 64;
+        opt.inSampleSize = 8;
 
         Drawable currentImage; //Drawable pour dessiner nos images
 
