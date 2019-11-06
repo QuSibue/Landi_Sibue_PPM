@@ -1,4 +1,4 @@
-# TP Programmation de Plateforme Mobile
+# TP Programmation de Plateforme Mobile (regarder branche **DEV-REFACTORING**)
 ## Estelle Landi & Quentin Sibué
 
 
