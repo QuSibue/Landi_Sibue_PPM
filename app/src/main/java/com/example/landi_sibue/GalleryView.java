@@ -23,32 +23,23 @@ public class GalleryView extends View {
     private ScaleGestureDetector mScaleGestureDetector;
 
     private float mScale = 1.f;
-    private float mScroll = 0f;
+    private int mScroll = 0;
+    int optSampleSize;
 
-    private Bitmap resized =null;
-
-    private int numColumns, numRows, nbPict;
+    private int numColumns;
     private int cellSize;
+    private int nbPict;
 
     private ArrayList<String> m_paths;
-    private Context m_context;
-
-    private ArrayList<Bitmap> m_imagesList = new ArrayList<>();
 
     private int nbRowPerDisplay;
-    private int nbImageToDisplay;
-    private int nbImagesAlreadyLoaded;
-
-    private int bitmapIndex;
+    private int firstRowToDiplay;
 
     public GalleryView(Context context, ArrayList<String> paths) {
         super(context);
-
-        m_context = context;
         m_paths = paths;
 
         numColumns = 3;
-        nbImagesAlreadyLoaded = 0;
 
         mScrollDetector = new GestureDetector(context, new ScrollGesture());
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
@@ -62,32 +53,32 @@ public class GalleryView extends View {
         invalidate();
     }
 
-    @Override
+    /*@Override
     public void setOnScrollChangeListener(OnScrollChangeListener l) {
         super.setOnScrollChangeListener(l);
-    }
+    }*/
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        /*for (int i = 0; i < numColumns; i++) {
-            for (int j = 0; j < nbRowPerDisplay; j++) {
-                    resized = Bitmap.createScaledBitmap(m_imagesList.get(bitmapIndex), cellSize, cellSize, true);
-                    canvas.drawBitmap(resized, i* cellSize, j * cellSize - mScroll, null);
-                    bitmapIndex++;
-            }
-        }*/
-
         BitmapFactory.Options opt = new BitmapFactory.Options();
         opt.inSampleSize = 1024;
 
-        for (int i = bitmapIndex; i - bitmapIndex < nbImageToDisplay && i < m_paths.size(); i++) {
-            Bitmap map = BitmapFactory.decodeFile(m_paths.get(i),opt);
-            resized = Bitmap.createScaledBitmap(map, cellSize, cellSize, true);
-            canvas.drawBitmap(resized, (i%numColumns)*cellSize, (i/numColumns)*cellSize-mScroll, null);
-        }
+        Bitmap bitmap;
+        Drawable drawable;
 
+        int currentImageIndex;
+
+        for (int i = 0; i < nbRowPerDisplay ; i++){
+            for (int j  = 0; j < numColumns; j++){
+                currentImageIndex = (firstRowToDiplay * numColumns) + i * numColumns + j;
+                bitmap =  BitmapFactory.decodeFile(m_paths.get(currentImageIndex), opt);
+                drawable = new BitmapDrawable(getResources(), bitmap);
+                drawable.setBounds(j * cellSize, i * cellSize, cellSize + j*cellSize  , cellSize+i*cellSize);
+                drawable.draw(canvas);
+            }
+        }
     }
 
     @Override
@@ -97,29 +88,11 @@ public class GalleryView extends View {
     }
 
     public void calculationCoordinate(){
-        numRows = nbPict/numColumns;
         cellSize = getWidth() / numColumns;
-
         nbRowPerDisplay = (getHeight() / cellSize) + 1 ;
-        bitmapIndex = (int) mScroll / cellSize * numColumns;
-        nbImageToDisplay = nbRowPerDisplay * numColumns;
-
+        firstRowToDiplay = mScroll/cellSize;
         invalidate();
-        //loadImages();
     }
-
-    /*public void loadImages(){
-
-        if(nbImageToDisplay > nbImagesAlreadyLoaded){
-            int nbImagesToLoad = nbImagesAlreadyLoaded + nbImageToDisplay ;
-            for(int i = nbImagesAlreadyLoaded ; i< nbImagesToLoad; i++){
-                m_imagesList.add(BitmapFactory.decodeFile(m_paths.get(i)));
-                nbImagesAlreadyLoaded++;
-            }
-        }
-
-        invalidate();
-    }*/
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -134,17 +107,14 @@ public class GalleryView extends View {
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
             if (distanceY != 1) {
                 if (0 > distanceY + mScroll){
-                    mScroll = 0f;
+                    mScroll = 0;
                 }
                 else {
                     mScroll += distanceY;
                 }
-                calculationCoordinate();
-
-                
             }
-
-            return true;
+            calculationCoordinate();
+            return super.onScroll(e1, e2, distanceX, distanceY);
         }
     }
 
@@ -153,6 +123,7 @@ public class GalleryView extends View {
         public boolean onScale(ScaleGestureDetector detector) {
             System.out.println(detector.getScaleFactor());
             float factor = detector.getScaleFactor();
+
             if(numColumns > 1 && factor > 1){
                 numColumns--;
             }
