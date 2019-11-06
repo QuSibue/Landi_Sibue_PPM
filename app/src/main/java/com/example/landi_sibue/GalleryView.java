@@ -26,34 +26,29 @@ public class GalleryView extends View {
     private GestureDetector mScrollDetector;
     private ScaleGestureDetector mScaleGestureDetector;
 
-    private float mScale = 1.f;
-    private int mScroll = 0;
-    int optSampleSize;
+    private int mScroll = 0; // entier utilisé pour le scroll des images
 
-    private int numColumns;
-    private int cellSize;
-    private int nbPict;
+    private int numColumns; //entier indiquant le nombre de colonnes courantes (change suivant le zoom ou le dézoom)
+    private int cellSize;   // entier indiquant la taille d'une image (carré dans notre cas)
+    private int nbPict;     // entier indiquant le nombre d'images totale qui ont été trouvées dans la galerie
 
-    private ArrayList<String> m_paths;
+    private ArrayList<String> m_paths; //liste des liens des images trouvées dans la galerie
 
-    private int nbRowPerDisplay;
-    private int firstRowToDiplay;
+    private int nbRowPerDisplay; //nombre de lignes pouvant être affichées à la fois
+    private int firstRowToDiplay; //Indice de la premiere ligne à afficher (en lien avec le scroll)
 
-
-    private Paint[] mColors;
-
-    private HashMap<Integer,Drawable> mCache = new HashMap<>();
+    private HashMap<Integer,Drawable> mCache = new HashMap<>(); //Liste des images déjà affichée au moins une fois
 
     public GalleryView(Context context, ArrayList<String> paths) {
         super(context);
-        m_paths = paths;
+        m_paths = paths; //On récupere la liste de paths passé au constructeur
 
-        numColumns = 7;
+        numColumns = 7; //on initialise notre nombre de colonnes au maximum
 
         mScrollDetector = new GestureDetector(context, new ScrollGesture());
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGesture());
 
-        nbPict = m_paths.size();
+        nbPict = m_paths.size(); //on enregistre le nombre d'images au total
 
     }
 
@@ -63,51 +58,44 @@ public class GalleryView extends View {
         invalidate();
     }
 
-    /*@Override
-    public void setOnScrollChangeListener(OnScrollChangeListener l) {
-        super.setOnScrollChangeListener(l);
-    }*/
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        BitmapFactory.Options opt = new BitmapFactory.Options();
+        BitmapFactory.Options opt = new BitmapFactory.Options(); // On définit l'option qui va "raccourcir" les images rendues pour économiser de la mémoire
         opt.inSampleSize = 64;
 
-        Bitmap bitmap;
-        Drawable currentImage;
+        Drawable currentImage; //Drawable pour dessiner nos images
 
-        int currentImageIndex;
+        int currentImageIndex; //indice de l'image courante à afficher
 
-        for (int i = 0; i < nbRowPerDisplay ; i++){
-            for (int j  = 0; j < numColumns; j++){
-                currentImageIndex = (firstRowToDiplay * numColumns) + i * numColumns + j;
-                if(currentImageIndex < nbPict){
-                    if(mCache.containsKey(currentImageIndex)){
-                        currentImage = mCache.get(currentImageIndex);
-                        currentImage.setBounds(j * cellSize, i * cellSize, cellSize + j*cellSize  , cellSize+i*cellSize);
-                        currentImage.draw(canvas);
+        for (int i = 0; i < nbRowPerDisplay ; i++){ //Pour chaque ligne affichables
+            for (int j  = 0; j < numColumns; j++){ //Pour chaque colonne
+                currentImageIndex = (firstRowToDiplay * numColumns) + i * numColumns + j; //On calcul l'indice de l'image courante (premiere image à afficher + le décalage courant)
+                if(currentImageIndex < nbPict){ //on vérifie qu'on n'essaye pas d'afficher trop d'images
+                    if(mCache.containsKey(currentImageIndex)){ //si notre cache possède l'image à afficher
+                        currentImage = mCache.get(currentImageIndex); //on récupere l'image
+                        currentImage.setBounds(j * cellSize, i * cellSize, cellSize + j*cellSize  , cellSize+i*cellSize); //on la place au bon endroit
+                        currentImage.draw(canvas); //on l'affiche
                     }
                     else{
-                        currentImage = addToCache(currentImageIndex,opt);
-                        currentImage.setBounds(j * cellSize, i * cellSize, cellSize + j*cellSize  , cellSize+i*cellSize);
-                        currentImage.draw(canvas);
+                        currentImage = addToCache(currentImageIndex,opt); //l'image n'a jamais été affichée auparavent, on la charge dans le cache et on la récupere
+                        currentImage.setBounds(j * cellSize, i * cellSize, cellSize + j*cellSize  , cellSize+i*cellSize); //on la place au bon endroit
+                        currentImage.draw(canvas); //on la dessine
                     }
-                    /*bitmap =  BitmapFactory.decodeFile(m_paths.get(currentImageIndex), opt);
-                    currentImage = new BitmapDrawable(getResources(), bitmap);
-                    currentImage.setBounds(j * cellSize, i * cellSize, cellSize + j*cellSize  , cellSize+i*cellSize);
-                    currentImage.draw(canvas);*/
                 }
 
             }
         }
     }
 
+    /*
+        Fonction qui ajoute en cache les images déjà affichées une fois
+     */
     public Drawable addToCache(int index, BitmapFactory.Options opt){
+
         Bitmap bitmap =  BitmapFactory.decodeFile(m_paths.get(index), opt);
         Drawable drawable = new BitmapDrawable(getResources(), bitmap);
-        //drawable.setBounds(left, top, right  , bottom);
 
         mCache.put(index,drawable);
 
@@ -120,10 +108,14 @@ public class GalleryView extends View {
         calculationCoordinate();
     }
 
+    /*
+        Fonction qui calcul tout les éléments utiles pour les images
+    */
+
     public void calculationCoordinate(){
-        cellSize = getWidth() / numColumns;
-        nbRowPerDisplay = getHeight() / cellSize + 1 ;
-        firstRowToDiplay = mScroll/cellSize;
+        cellSize = getWidth() / numColumns; //Taille d'une cellule (en hauteur comme en largeur)
+        nbRowPerDisplay = getHeight() / cellSize + 1 ; //nombre de lignes pouvant être affichées à la fois
+        firstRowToDiplay = mScroll/cellSize; //première ligne à afficher
         invalidate();
     }
 
@@ -136,15 +128,17 @@ public class GalleryView extends View {
 
     public class ScrollGesture extends GestureDetector.SimpleOnGestureListener {
 
+        /*
+            Calcul du facteur de scroll afin de gérer les mouvement de l'utilisateur
+         */
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (distanceY != 1) {
-                if (0 > distanceY + mScroll){
-                    mScroll = 0;
-                }
-                else {
-                    mScroll += distanceY;
-                }
+
+            if (0 > distanceY + mScroll){
+                mScroll = 0;
+            }
+            else {
+                mScroll += distanceY;
             }
             calculationCoordinate();
             return super.onScroll(e1, e2, distanceX, distanceY);
@@ -154,13 +148,12 @@ public class GalleryView extends View {
     public class ScaleGesture extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            System.out.println(detector.getScaleFactor());
             float factor = detector.getScaleFactor();
 
-            if(numColumns > 1 && factor > 1){
+            if(numColumns > 1 && factor > 1){ //si l'utilisateur éloigne ses doigts, on réduit le nombre de colonnes
                 numColumns--;
             }
-            else if (numColumns < 7 && factor < 1){
+            else if (numColumns < 7 && factor < 1){ //si l'utilisateur rapproche ses doigts, on augmente le nombre de colonnes
                 numColumns ++;
             }
             calculationCoordinate();

@@ -22,32 +22,26 @@ public class ScanPictures {
 
         String[] columns = { MediaStore.Images.Media.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
 
-        String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " = ? ";
+        String selection = MediaStore.Images.Media.BUCKET_DISPLAY_NAME + " = ? "; //On rajoute une requete
 
-        String selectionArgs[] = {"Camera"};
+        String selectionArgs[] = {"Camera"}; //on precise où on veut chercher, dans la galerie dans notre cas
 
-        String orderBy = MediaStore.Images.Media.DATE_TAKEN;
-        //Stores all the images from the gallery in Cursor
-        Cursor cursor = m_application_context.getContentResolver().query(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, selection, selectionArgs, orderBy);
+        String orderBy = MediaStore.Images.Media.DATE_TAKEN; //On trie les photo par ordre de capture (de la plus ancienne à la plus récente)
 
-        //Total number of images
+        //On stock toutes les images de la galerie dans le Cursor
+        Cursor cursor = m_application_context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, selection, selectionArgs, orderBy);
+
+        //On récupere le nombre total d'images
         int count = cursor.getCount();
 
-        //Create an array to store path to all the images
-        String[] arrPath = new String[count];
-
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) { //Pour chaque élements du cursor
             cursor.moveToPosition(i);
             int dataColumnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
 
-            //Store the path of the image
-            arrPath[i]= cursor.getString(dataColumnIndex);
-            paths.add(arrPath[i]);
+            //On ajoute le chemin de l'image au tableau de paths
+            paths.add(cursor.getString(dataColumnIndex));
 
         }
-
-        System.out.println(paths);
 
         return  paths;
     }
