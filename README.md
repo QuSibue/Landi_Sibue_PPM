@@ -48,10 +48,13 @@ En plus des fonctionnalités mises en place lundi matin, nous en avons ajoutées
 
 __**Problèmes connus**__ :
 
-Le problème principale que nous avons, est que à chaque onDraw, la totalité des images sont "récrées" ce qui est très problématique et long à executer.
+- Le problème principale que nous avons, est que à chaque onDraw, la totalité des images sont "récrées" ce qui est très problématique et long à executer.
 
-Ce chargement des images étant une opération lourde, et, n'ayant pas réussi à trouver une alternative "efficace", nous avons décidé de mettre en place un système de "cache" afin de diminuer l'effet de lenteur d'éxecution.
+  Ce chargement des images étant une opération lourde, et, n'ayant pas réussi à trouver une alternative "efficace", nous avons décidé de   mettre en place un système de "cache" afin de diminuer l'effet de lenteur d'éxecution.
 
-Nous sommes conscient que ce n'est pas la solution optimale, mais nous avons préféré faire ça pour rendre quelque chose un minimum utilisable.
+
+- Utilisant un système de cache, nous voulions mettre en place un système qui change le taux de compression suivant le nombre de colonnes affichées, mais cela rentrait en contradiction avec le cache, nous sommes en recherche d'une solution.
+
+Nous sommes conscient de ces problèmes et que ce n'est pas la solution optimale, mais nous avons préféré faire ça pour rendre quelque chose un minimum utilisable.
 
 
